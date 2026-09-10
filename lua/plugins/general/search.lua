@@ -58,7 +58,24 @@ return {
       },
       {
         "<leader>sd",
-        function() require("telescope.builtin").diagnostics() end,
+        function()
+          require("telescope.builtin").diagnostics({
+            -- on select jump to the diagnostic's line (default action) and then open the
+            -- full-message float at the cursor
+            attach_mappings = function(_, _)
+              local actions = require("telescope.actions")
+              local action_set = require("telescope.actions.set")
+              actions.select_default:replace(function(prompt_bufnr)
+                action_set.select(prompt_bufnr, "default") -- underlying jump; does NOT recurse
+                vim.schedule(function()
+                  vim.diagnostic.open_float(nil, { scope = "line", border = "rounded" })
+                end)
+                return true
+              end)
+              return true -- keep telescope's default mappings
+            end,
+          })
+        end,
         mode = "n",
         desc = "Search diagnostics",
       },

@@ -82,6 +82,7 @@ return {
         callback = function(event)
           local opts = { buffer = event.buf }
           vim.keymap.set("n", "<leader>ld", function() vim.lsp.buf.hover() end, opts)
+          vim.keymap.set("n", "<leader>lD", function() vim.diagnostic.open_float(nil, { scope = "line", border = "rounded" }) end, opts)
           vim.keymap.set("n", "<leader>lgd", function() vim.lsp.buf.definition() end, opts)
           vim.keymap.set("n", "<leader>lgD", function() vim.lsp.buf.declaration() end, opts)
           vim.keymap.set("n", "<leader>lgi", function() vim.lsp.buf.implementation() end, opts)
@@ -103,7 +104,8 @@ return {
       -- add keybindings to which-key in a structured manner
       require("which-key").add({
         { "<leader>l", group = "lsp", icon = { icon = "", color = "blue" } },
-        { "<leader>ld", mode = "n", desc = "Documentation preview of symbol (floating)", icon = { icon = "", color = "purple" } },
+        { "<leader>ld", mode = "n", desc = "Documentation preview of symbol", icon = { icon = "", color = "purple" } },
+        { "<leader>lD", mode = "n", desc = "Full diagnostic(s) for current line", icon = { icon = "", color = "red" } },
         { "<leader>lg", group = "goto", icon = { icon = "⚡", } },
         { "<leader>lgd", mode = "n", desc = "Go to symbol definition" },
         { "<leader>lgD", mode = "n", desc = "Go to symbol declaration" },
