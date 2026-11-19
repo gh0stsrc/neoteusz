@@ -10,6 +10,7 @@ return {
     dependencies = {
       { "folke/which-key.nvim" },
     },
+    event = { "BufReadPre", "BufNewFile" },
     opts = {
       signs = {
         add = { text = "+" } -- override gitsigns to reflect new lines with a `plus` sign
@@ -21,9 +22,39 @@ return {
           vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
         end
 
+        -- Report gitsigns errors as a notification instead of a raised traceback
+        local function notify_err(err)
+          vim.schedule(function()
+            vim.notify(tostring(err), vim.log.levels.ERROR)
+          end)
+        end
+
+        -- Show the hunk under the cursor inline in the buffer
+        local function preview_inline()
+          gitsigns.preview_hunk_inline(function(err)
+            if err then
+              notify_err(err)
+            end
+          end)
+        end
+
+        -- Jump to the next/previous hunk, then preview it inline
+        local function nav(direction)
+          return function()
+            gitsigns.nav_hunk(direction, nil, function(err)
+              if err then
+                notify_err(err)
+                return
+              end
+              preview_inline()
+            end)
+          end
+        end
+
         -- hunk navigation
-        map("n", "<leader>gn", function() gitsigns.nav_hunk("next") end, "Next git hunk")
-        map("n", "<leader>gp", function() gitsigns.nav_hunk("prev") end, "Previous git hunk")
+        map("n", "<leader>gp", preview_inline, "Preview git hunk")
+        map("n", "<leader>g[", nav("prev"), "Previous git hunk")
+        map("n", "<leader>g]", nav("next"), "Next git hunk")
 
         -- search all repo hunks via telescope (populate qflist, then open telescope's quickfix picker)
         map("n", "<leader>g<enter>", function()
